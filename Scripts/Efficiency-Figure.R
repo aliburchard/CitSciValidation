@@ -31,11 +31,12 @@ sp <- c(spl3, spl4, spl1)
 type <- c(rep("High Accuracy", 3), rep("High False Negative", 3), rep("High False Positive", 3))
 spdat <- as.data.frame(cbind(sp, type))
 
+labels <- read.csv("Data/Accuracylabels.csv") %>% distinct(., Species) 
+
 SppPlotDat <- by_consensus %>% 
   filter(., AlgoSpp %in% spdat$sp) %>% 
   mutate(., type= spdat$type[match(.$AlgoSpp, spdat$sp)], ConsensusSpecies = factor(AlgoSpp, levels = sp, ordered = T)) %>%
-  mutate(., typeID = str_replace_all(type, pattern = " ", replacement = ""))
-
+  mutate(., typeID = str_replace_all(type, pattern = " ", replacement = "")))
 
 quartz()
 ggplot(data = SppPlotDat, aes(x = n, y = percentCorrect, group = ConsensusSpecies, color = ConsensusSpecies)) + 
@@ -46,30 +47,37 @@ ggplot(data = SppPlotDat, aes(x = n, y = percentCorrect, group = ConsensusSpecie
 
 
 xs <- split(SppPlotDat,f = SppPlotDat$typeID)
-ha <- guide_legend(title.position = "top", title = "High Accuracy")
-fp <- guide_legend(title.position = "top", title = "High False ")
-fn <- guide_legend(title.position = "top", title = "High False Negatives")
+ha <- guide_legend(title = element_blank(), override.aes=aes(fill=NA))
+fp <- guide_legend(title = element_blank(), override.aes=aes(fill=NA))
+fn <- guide_legend(title = element_blank(), override.aes=aes(fill=NA))
 
+
+  
 quartz()
-p1 <- ggplot(xs$HighAccuracy, aes(x = n, y = percentCorrect, group = ConsensusSpecies, color = ConsensusSpecies, linetype = ConsensusSpecies, shape = ConsensusSpecies)) + 
+p1 <- ggplot(xs$HighAccuracy, aes(x = n, y = percentCorrect, 
+                                  group = ConsensusSpecies, color = ConsensusSpecies, 
+                                  linetype = ConsensusSpecies, shape = ConsensusSpecies)) + 
   geom_point(size = .7) + geom_smooth(se = T) + scale_colour_grey() + 
   facet_grid(~type) +
   xlab("Number Classifiers") +
   ylab("Proportion Correct") +
   scale_y_continuous(limits = c(0,1.05), breaks = c(0, .25, .5, .75, 1.0)) +
   theme_bw() + 
-  theme(legend.position = "bottom") +
   guides(col = ha, linetype = ha, shape = ha) +
-  theme(plot.margin = unit(c(1,0,0,0), "lines"))
-  
+  theme(legend.position = "bottom", plot.margin = unit(c(1,0,0,0), "lines")) 
   
 
-p2 <- p1 %+% xs$HighFalseNegative + ylab("") + scale_y_continuous(breaks = NULL) + guides(col = fn, linetype = fn, shape = fn) + ylab(NULL) +
+p2 <- p1 %+% xs$HighFalseNegative + ylab("") + 
+  scale_y_continuous(breaks = NULL) + 
+  guides(col = fn, linetype = fn, shape = fn) + ylab(NULL) +
   theme(plot.margin = unit(c(1,0,0,0), "lines"))
 
-p3 <- p1 %+% xs$HighFalsePositive + ylab("") + scale_y_continuous(breaks = NULL) + guides(col = fp, linetype = fp, shape = fp) + ylab(NULL) +
+p3 <- p1 %+% xs$HighFalsePositive + ylab("") + 
+  scale_y_continuous(breaks = NULL) + 
+  guides(col = fp, linetype = fp, shape = fp, ) + ylab(NULL) +
   theme(plot.margin = unit(c(1,.25,0,0), "lines"))
 
+#pdf(file = "Figures/Fig7b.pdf", width = 600, height = 400)
 grid.arrange(p1,p2,p3, ncol = 3, nrow = 1, widths = c(.85, .75, .75))
 
 

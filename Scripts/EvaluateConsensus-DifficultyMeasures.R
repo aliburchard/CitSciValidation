@@ -22,20 +22,36 @@ splist <- cons %>% group_by(Species) %>% summarise(., totpix = n()) %>%
 ############ plotting difficulty ########
 consdat %<>% mutate(., FracBlanks = NumBlanks/NumClassifications)
 
+# 
+# EvennessPlotDat <- consdat  %>% 
+#   mutate(Match = ifelse(Match == "right", "correct", ifelse(Match == "wrong", "incorrect", "impossible"))) %>%
+#   mutate(Match = factor(Match, levels = c("correct", "incorrect", "impossible"), ordered = T)) %>% 
+#   select(., CaptureEventID, Evenness, FractionSupport, FractionBlanks, Match, Source) %>%
+#   mutate(., InvertedSupport = 1-FractionSupport) %>%
+#   gather(., key = Metric, value = value, -Match, -Source, -CaptureEventID)
+# 
 
 EvennessPlotDat <- consdat  %>% 
   mutate(Match = ifelse(Match == "right", "correct", ifelse(Match == "wrong", "incorrect", "impossible"))) %>%
   mutate(Match = factor(Match, levels = c("correct", "incorrect", "impossible"), ordered = T)) %>% 
+  mutate(., FractionSupport = 1-FractionSupport) %>%
   select(., CaptureEventID, Evenness, FractionSupport, FractionBlanks, Match, Source) %>%
-  gather(., key = Metric, value = value, -Match, -Source, -CaptureEventID)
+  gather(., key = Metric, value = value, -Match, -Source, -CaptureEventID) %>%
+  mutate(., Metric = ifelse(as.character(Metric) == "FractionSupport", "1 - FractionSupport", as.character(Metric))) %>%
+  mutate(., Metric = factor(Metric, levels = c("Evenness", "1 - FractionSupport", "FractionBlanks", ordered = T)))
+
 
 ann_text <- expand.grid(Match = unique(EvennessPlotDat$Match), Metric = unique(EvennessPlotDat$Metric))
 ann_text$text <- c("a", "b", "b", "a", "b", "b", "a", "b", "c")
 ann_text$value <- 1.05
-
+## figure 5 ##
 quartz()
-p <- ggplot(data = EvennessPlotDat, aes(x=Match, y=value)) + geom_boxplot() + facet_wrap(~Metric) +
-  theme_bw() + xlab("Match to Gold Standard")
+p <- ggplot(data = EvennessPlotDat, aes(x=Match, y=value)) + 
+  geom_boxplot() + 
+  facet_wrap(~Metric) +
+  theme_bw(base_size = 14) + 
+  xlab("Comparison to Expert Classifications") + 
+  ylab("Uncertainty")
 p + geom_text(data = ann_text, aes(label = text), size = 4)
 
 quartz()
@@ -93,6 +109,7 @@ means %>% filter(Measure == "Evenness") %>% lm(value ~ log(totpix), data = .) %>
 # FractionSupport (p < 0.0001, r2 = .397, df = 46)
 # Evenness (p <0.001, R2 = .214, df = 46)
 # FractionBlanks (p = 0.0036, R2 = 0.170, df = 46)
+
 
 quartz()
 ggplot(data = means, aes(x = totpix, y = value)) + 

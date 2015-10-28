@@ -55,24 +55,41 @@ EvennessData <- consdat %>% filter(., Source %in% "gold") %>%
 
 quartz()
 
-plot_boxes <- ggplot(data = EvennessData, aes(x=Match, y=Evenness)) + 
-  geom_boxplot() +
-  theme_bw() + xlab("Match to Gold Standard") + ylab("Disagreement") +
-  text_sizing + theme(plot.margin = unit(c(1, 0, 1, 1), "line")) + 
-  coord_cartesian(ylim = c(0,1))
+png('~/Documents/Presentations/HL-slides/boxplots.png',width=550,height=550, bg = "transparent")  
+ggplot(data = EvennessData, aes(x=Match, y=Evenness)) + 
+  geom_boxplot(fill = "transparent", lwd = 1.1) +
+  theme_bw() + xlab("") + ylab("") +
+  text_sizing + 
+  coord_cartesian(ylim = c(0,1)) +
+  theme(plot.margin = unit(c(1, 0, 1, 1), "line"),  
+                  panel.grid.major = element_blank(),
+                  panel.grid.minor = element_blank(),
+                  panel.background = element_rect(fill = "transparent", colour = "transparent"),
+                  plot.background = element_rect(fill = "transparent", colour = "transparent"),
+                  axis.text = element_text(size = 20))
+dev.off()
   
 
-plot_distrib <- ggplot(data  = EvennessData, aes(x = Evenness)) + 
+
+  
+png('~/Documents/Presentations/HL-slides/histogram.png',width=375,height=550, bg = "transparent")  
+ggplot(data  = EvennessData, aes(x = Evenness)) + 
   geom_histogram() + 
   coord_flip() +
   scale_x_continuous(expand = c(0, 0)) +
   #expand_limits(x = c(-.001, 1.01)) +
-  labs(x = NULL) + theme_bw() + text_sizing +
-  theme(axis.text.y = element_blank(), axis.ticks.y = element_blank(), 
+  labs(x = "", y = "") + theme_bw() +
+  theme(axis.text.y = element_blank(), 
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect(fill = "transparent", colour = "transparent"),
+        plot.background = element_rect(fill = "transparent", colour = "transparent"),
+        axis.text = element_text(size = 20),
+        axis.ticks.y = element_blank(), 
         plot.margin = unit(c(1, 1, 1, 0), "line"), 
-        axis.text.x = element_text(size = 16))
-  
-  
+        axis.text = element_text(size = 20))
+dev.off()
+
 grid.arrange(plot_boxes, plot_distrib, ncol = 2, widths = c(3, 1))
 
 ## stats for plot:

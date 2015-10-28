@@ -137,7 +137,7 @@ accuracy_dat <- accuracy %>%
   mutate(., regression = ifelse(accuracy == 0, "No", "Yes"), modified = ifelse(accuracy == 0, accuracy + .001, accuracy))
 
 
-quartz()
+pdf(file = "Figures/Figure4.pdf",width = 4, height=4)
 ggplot(accuracy_1, aes(x=totpix, y=accuracy)) + 
   #geom_point(data = accuracy_0, color = "black", aes(shape = ErrorType)) +
   geom_point(aes(colour = ErrorType, shape = ErrorType)) + 
@@ -148,10 +148,10 @@ ggplot(accuracy_1, aes(x=totpix, y=accuracy)) +
   scale_x_log10(breaks = c(1, 10, 100, 1000, 10000, 100000), labels = comma, limits= c(10,100000)) + 
   scale_y_log10(breaks = c(.01, .1, 1.0), limits = c(.01, 1.01)) +
   #scale_x_sqrt() + scale_y_sqrt() +
-  theme(legend.position = c(.8, .85)) + 
-  xlab("Total Captures") + ylab("Fraction of Error") +
+  theme(legend.position = c(.72, .85), text= element_text(size=12)) + 
+  xlab("Total Photographs") + ylab("Fraction of Error") +
   theme(panel.margin = unit(1, "lines"))
-
+dev.off()
 
 
 summary(lm(data = filter(CGC, FalsePos != 0), log(FalsePos) ~ log10(totpix)))
